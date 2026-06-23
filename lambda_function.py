@@ -1,4 +1,3 @@
-```python
 import boto3
 import csv
 
@@ -57,4 +56,3 @@ CSV processing completed successfully.
             "statusCode": 500,
             "body": str(e)
         }
-```
