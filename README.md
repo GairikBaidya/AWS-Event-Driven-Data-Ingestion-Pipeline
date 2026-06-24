@@ -1,434 +1,333 @@
-# AWS S3 → Lambda → SNS CSV Processing Project
+# 🚀 AWS Serverless CSV Processing Pipeline
 
-## Project Overview
+> An end-to-end event-driven data ingestion pipeline built using AWS services that securely uploads CSV files from a web application, processes data automatically, stores records in MySQL, and sends real-time email notifications.
 
-This project demonstrates a serverless event-driven architecture on AWS.
-
-Whenever a CSV file is uploaded to an Amazon S3 bucket:
-
-1. Amazon S3 triggers an AWS Lambda function.
-2. Lambda reads the uploaded CSV file.
-3. Lambda parses the CSV data using Python.
-4. Parsed records are logged to CloudWatch.
-5. Lambda sends an email notification using Amazon SNS.
+![AWS](https://img.shields.io/badge/AWS-Cloud-orange)
+![Lambda](https://img.shields.io/badge/AWS-Lambda-yellow)
+![S3](https://img.shields.io/badge/Amazon-S3-blue)
+![SNS](https://img.shields.io/badge/Amazon-SNS-green)
+![MySQL](https://img.shields.io/badge/MySQL-Database-blue)
+![Python](https://img.shields.io/badge/Python-3.13-yellow)
 
 ---
 
-# Architecture
+# 📌 Project Overview
+
+This project demonstrates a complete cloud-native, event-driven architecture using AWS services.
+
+When a user uploads a CSV file through the web application:
+
+✅ File is securely uploaded to Amazon S3 using a Pre-Signed URL
+
+✅ Amazon S3 triggers an AWS Lambda function
+
+✅ Lambda reads and parses the CSV file
+
+✅ Records are inserted into a MySQL database hosted on AWS EC2
+
+✅ Amazon SNS sends an email notification
+
+✅ Logs are stored in Amazon CloudWatch
+
+---
+
+# 🏗️ Architecture
 
 ```text
-CSV Upload
-     │
-     ▼
-Amazon S3 Bucket
-     │
-     ▼
-AWS Lambda
-     │
- ┌───┴────┐
- ▼        ▼
-CloudWatch SNS
- Logs      │
-           ▼
-      Email Alert
+┌─────────────────┐
+│   Frontend UI   │
+│ HTML/CSS/JS     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ API Gateway     │
+└────────┬────────┘
+         │
+         ▼
+┌────────────────────────┐
+│ Lambda                 │
+│ Generate Pre-Signed URL│
+└────────┬───────────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Amazon S3       │
+│ CSV Storage     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────────────┐
+│ Lambda CSV Processor    │
+│ Parse CSV & Insert Data │
+└───────┬─────────┬───────┘
+        │         │
+        ▼         ▼
+ ┌───────────┐ ┌──────────┐
+ │ MySQL EC2 │ │ SNS Email│
+ └───────────┘ └──────────┘
 ```
 
 ---
 
-# AWS Services Used
+# ✨ Features
 
-| Service    | Purpose                    |
-| ---------- | -------------------------- |
-| Amazon S3  | Store uploaded CSV files   |
-| AWS Lambda | Process uploaded CSV files |
-| Amazon SNS | Send email notifications   |
-| IAM        | Manage permissions         |
-| CloudWatch | Store Lambda logs          |
+### 🌐 Frontend
+
+* Modern CSV Upload Interface
+* Drag & Drop Support
+* CSV Preview
+* Upload Progress Tracking
+* Success Receipt Generation
+
+### ☁️ AWS Services
+
+* Amazon S3
+* AWS Lambda
+* API Gateway
+* Amazon SNS
+* CloudWatch Logs
+* IAM Roles & Policies
+* Lambda Layers
+
+### 🗄️ Database
+
+* MySQL on Amazon EC2
+* Automatic Record Insertion
+* Structured Employee Data Storage
+
+### 🔒 Security
+
+* Pre-Signed URLs
+* IAM Role-Based Access
+* Secure Browser Uploads
+* No AWS Credentials Exposed
 
 ---
 
-# Project Workflow
+# 🛠️ Tech Stack
 
-Step 1:
+| Category     | Technology            |
+| ------------ | --------------------- |
+| Frontend     | HTML, CSS, JavaScript |
+| Backend      | Python                |
+| Cloud        | AWS                   |
+| Storage      | Amazon S3             |
+| Compute      | AWS Lambda            |
+| API          | API Gateway           |
+| Notification | Amazon SNS            |
+| Database     | MySQL                 |
+| Monitoring   | CloudWatch            |
 
-User uploads a CSV file to S3.
+---
 
-Example:
+# 📂 Project Structure
+
+```text
+aws-serverless-csv-processing-pipeline/
+│
+├── frontend/
+│   └── index.html
+│
+├── lambda/
+│   ├── generate-upload-url/
+│   │   └── lambda_function.py
+│   │
+│   └── csv-processor/
+│       └── lambda_function.py
+│
+├── screenshots/
+│   ├── frontend.png
+│   ├── upload-success.png
+│   ├── s3-upload.png
+│   ├── mysql-data.png
+│   └── sns-email.png
+│
+├── architecture.png
+│
+└── README.md
+```
+
+---
+
+# ⚙️ Workflow
+
+## Step 1
+
+User uploads:
 
 ```text
 employees.csv
 ```
 
-Step 2:
-
-S3 Event Notification triggers Lambda.
-
-Step 3:
-
-Lambda retrieves file using:
-
-```python
-s3.get_object()
-```
-
-Step 4:
-
-Lambda parses CSV using:
-
-```python
-csv.DictReader()
-```
-
-Step 5:
-
-Records are printed to CloudWatch Logs.
-
-Example:
-
-```python
-{
-'name': 'John Doe',
-'email': 'john.doe@example.com',
-'department': 'Engineering',
-'salary': '95000'
-}
-```
-
-Step 6:
-
-Lambda publishes a message to SNS.
-
-Step 7:
-
-SNS sends an email notification to subscribed users.
+from the web application.
 
 ---
 
-# Prerequisites
+## Step 2
 
-AWS Account
-
-Basic knowledge of:
-
-* S3
-* Lambda
-* IAM
-* SNS
-* Python
-
----
-
-# Step 1: Create S3 Bucket
-
-Navigate to:
+Frontend requests a secure upload URL from:
 
 ```text
-AWS Console
-→ S3
-→ Create Bucket
-```
-
-Bucket Name:
-
-```text
-test-csv-rik
-```
-
-Keep default settings.
-
----
-
-# Step 2: Create SNS Topic
-
-Navigate to:
-
-```text
-AWS Console
-→ SNS
-→ Topics
-→ Create Topic
-```
-
-Type:
-
-```text
-Standard
-```
-
-Name:
-
-```text
-csv-upload-alert
-```
-
-Copy Topic ARN.
-
-Example:
-
-```text
-arn:aws:sns:ap-south-1:123456789012:csv-upload-alert
+API Gateway
 ```
 
 ---
 
-# Step 3: Create Email Subscription
+## Step 3
 
-Inside SNS Topic:
-
-```text
-Create Subscription
-```
-
-Protocol:
+Lambda generates a temporary:
 
 ```text
-Email
-```
-
-Endpoint:
-
-```text
-your-email@example.com
-```
-
-Confirm the subscription through the email received from AWS.
-
----
-
-# Step 4: Create Lambda Function
-
-Navigate to:
-
-```text
-AWS Console
-→ Lambda
-→ Create Function
-```
-
-Configuration:
-
-```text
-Function Name:
-csv-file-processor
-
-Runtime:
-Python 3.13
-
-Handler:
-lambda_function.lambda_handler
-```
-
-Upload:
-
-```text
-lambda_function.py
+Pre-Signed URL
 ```
 
 ---
 
-# Step 5: Configure IAM Permissions
+## Step 4
 
-Attach permissions to Lambda execution role.
-
-Required permissions:
-
-## S3
-
-```json
-{
-  "Effect": "Allow",
-  "Action": [
-    "s3:GetObject"
-  ],
-  "Resource": "*"
-}
-```
-
-## SNS
-
-```json
-{
-  "Effect": "Allow",
-  "Action": [
-    "sns:Publish"
-  ],
-  "Resource": "*"
-}
-```
-
-For learning purposes you may attach:
+Browser uploads CSV directly to:
 
 ```text
-AmazonS3ReadOnlyAccess
-AmazonSNSFullAccess
+Amazon S3
 ```
 
 ---
 
-# Step 6: Configure S3 Trigger
+## Step 5
 
-Open Lambda.
-
-Select:
+S3 triggers:
 
 ```text
-Add Trigger
+CSV Processing Lambda
 ```
-
-Choose:
-
-```text
-S3
-```
-
-Configuration:
-
-```text
-Bucket:
-test-csv-rik
-
-Event Type:
-PUT
-
-Prefix:
-(optional)
-
-Suffix:
-.csv
-```
-
-Save.
 
 ---
 
-# Step 7: Deploy Lambda Code
+## Step 6
 
-Update:
+Lambda:
 
-```python
-TOPIC_ARN = "YOUR_SNS_TOPIC_ARN"
-```
-
-Deploy Lambda.
+* Reads CSV
+* Parses records
+* Inserts rows into MySQL
 
 ---
 
-# Testing
+## Step 7
 
-Upload:
-
-```text
-employees.csv
-```
-
-to:
+Amazon SNS sends:
 
 ```text
-test-csv-rik
+CSV Imported Successfully
 ```
 
-Expected Results:
+email notification.
 
-## CloudWatch Logs
+---
+
+# 📧 Sample Notification
 
 ```text
-File Uploaded: employees.csv
-Total Rows: 4
-```
-
-## SNS Email
-
 Subject:
+CSV Imported Successfully
 
-```text
-CSV File Uploaded
-```
-
-Message:
-
-```text
-A new CSV file has been uploaded.
-
-Bucket: test-csv-rik
 File: employees.csv
-Total Records: 4
 
-CSV processing completed successfully.
+Rows Inserted: 5
+
+Database: csvdb
+Table: employees
 ```
 
 ---
 
-# Common Issues and Fixes
+# 🗃️ Sample CSV
 
-## AccessDenied on GetObject
+```csv
+name,email,department,salary
+John Doe,john.doe@example.com,Engineering,95000
+Jane Smith,jane.smith@example.com,Marketing,78000
+Michael Chang,m.chang@example.com,Sales,82000
+```
 
-Cause:
+---
 
-Missing S3 permissions.
+# 📸 Screenshots
 
-Fix:
+## Frontend Upload Portal
+
+Add screenshot here:
 
 ```text
-s3:GetObject
+screenshots/frontend.png
 ```
 
-permission must be attached.
+## Successful Upload
 
----
-
-## Unable to Import Module
-
-Cause:
-
-Wrong file name or handler.
-
-Correct:
+Add screenshot here:
 
 ```text
-lambda_function.py
+screenshots/upload-success.png
 ```
 
-Handler:
+## Data Stored in MySQL
+
+Add screenshot here:
 
 ```text
-lambda_function.lambda_handler
+screenshots/mysql-data.png
+```
+
+## SNS Email Notification
+
+Add screenshot here:
+
+```text
+screenshots/sns-email.png
 ```
 
 ---
 
-## No Email Received
+# 🎯 Learning Outcomes
 
-Verify:
+Through this project I learned:
 
-1. SNS subscription is confirmed.
-2. Correct Topic ARN is configured.
-3. Lambda has sns:Publish permission.
+* Event-Driven Architecture
+* AWS Lambda
+* Amazon S3
+* API Gateway
+* Lambda Layers
+* IAM Permissions
+* SNS Notifications
+* MySQL Integration
+* CloudWatch Monitoring
+* CORS Configuration
+* Secure File Uploads using Pre-Signed URLs
 
 ---
 
-# Future Enhancements
+# 🚧 Future Improvements
 
-This project can be extended with:
-
-* MySQL Database Integration
-* Amazon RDS
-* Duplicate Record Detection
+* Dynamic File Naming
+* Duplicate Record Handling
+* RDS MySQL Migration
+* Dashboard & Analytics
+* Authentication with Cognito
 * CSV Validation
-* Error Notification Emails
-* Dead Letter Queue (DLQ)
-* EventBridge Integration
-* CloudWatch Dashboard
-* Data Analytics Pipeline
+* Multi-User Support
+* Data Visualization
 
 ---
 
-# Author
+# 👨‍💻 Author
 
-Gairik Baidya
+### Gairik Baidya
 
-MCA | AWS Cloud & Full Stack Developer
+MCA Student | Full Stack Developer | AWS Cloud Enthusiast
 
-GitHub Portfolio Project
+📌 Passionate about Cloud Computing, Web Development, and AI
 
-```
-```
+---
+
+⭐ If you found this project useful, don't forget to star the repository.
